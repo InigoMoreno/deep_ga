@@ -107,7 +107,7 @@ class PatchDataGenerator(keras.utils.Sequence):
             params (dict): parameters
         """
         self.size = size
-        self.image = image
+        self.dem = dem
         self.batch_size = batch_size
         self.params = params
 
@@ -117,5 +117,5 @@ class PatchDataGenerator(keras.utils.Sequence):
 
     def __getitem__(self, index):
         """Generate one batch of data"""
-        Xa, Xb, y = get_batch(self.batch_size, self.image, self.params)
+        Xa, Xb, y = get_batch(self.batch_size, self.dem, self.params)
         return [Xa, Xb], y
