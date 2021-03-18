@@ -122,17 +122,17 @@ def get_batch(batch_size, dem, p, seed=None):
         # find first patch
         patch_a = None
         while patch_a is None:
-        xa = random.uniform(0, dem.shape[0])
-        ya = random.uniform(0, dem.shape[1])
-        patch_a = get_patch(dem, xa, ya, p)
+            xa = random.uniform(0, dem.shape[0])
+            ya = random.uniform(0, dem.shape[1])
+            patch_a = get_patch(dem, xa, ya, p)
         patches_a[i, :, :] = patch_a
 
         # find second patch close to first
         patch_b = None
         while patch_b is None:
-        xb = xa + random.normal(scale=p["stdPatchShift"]/p["resolution"])
-        yb = ya + random.normal(scale=p["stdPatchShift"]/p["resolution"])
-        patch_b = get_patch(dem, xb, yb, p)
+            xb = xa + random.normal(scale=p["stdPatchShift"]/p["resolution"])
+            yb = ya + random.normal(scale=p["stdPatchShift"]/p["resolution"])
+            patch_b = get_patch(dem, xb, yb, p)
         patches_b[i, :, :] = patch_b
 
         # compute output function
