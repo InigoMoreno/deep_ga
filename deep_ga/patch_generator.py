@@ -1,5 +1,6 @@
 import cv2
 from tensorflow import keras
+import numpy as np
 
 
 def get_patch(dem, x, y, p):
