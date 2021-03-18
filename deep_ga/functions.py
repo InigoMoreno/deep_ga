@@ -116,8 +116,6 @@ def get_batch(batch_size, dem, p, seed=None):
         (batch_size, p["mapLengthPixels"], p["mapLengthPixels"]))
     distances = np.empty((batch_size,))
 
-    cov = (p["stdEvaluationFunction"]/p["resolution"])**2
-
     for i in range(batch_size):
         # find first patch
         patch_a = None
