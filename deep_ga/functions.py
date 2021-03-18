@@ -106,36 +106,36 @@ def get_batch(batch_size, dem, p, seed=None):
             patches_b (numpy array): right patches of the batch
             distances (double): distances between left and right patches
     """
-  # initialize random
-  random = np.random.RandomState(seed)
+    # initialize random
+    random = np.random.RandomState(seed)
 
-  # initialize data
-  patches_a = np.empty(
-      (batch_size, p["mapLengthPixels"], p["mapLengthPixels"]))
-  patches_b = np.empty(
-      (batch_size, p["mapLengthPixels"], p["mapLengthPixels"]))
-  distances = np.empty((batch_size,))
+    # initialize data
+    patches_a = np.empty(
+        (batch_size, p["mapLengthPixels"], p["mapLengthPixels"]))
+    patches_b = np.empty(
+        (batch_size, p["mapLengthPixels"], p["mapLengthPixels"]))
+    distances = np.empty((batch_size,))
 
-  cov = (p["stdEvaluationFunction"]/p["resolution"])**2
- 
-  for i in range(batch_size):
-    # find first patch
-    patch_a = None
-    while patch_a is None:
-      xa = random.uniform(0, dem.shape[0])
-      ya = random.uniform(0, dem.shape[1])
-      patch_a = get_patch(dem, xa, ya, p)
-    patches_a[i, :, :] = patch_a
+    cov = (p["stdEvaluationFunction"]/p["resolution"])**2
 
-    # find second patch close to first
-    patch_b = None
-    while patch_b is None:
-      xb = xa + random.normal(scale=p["stdPatchShift"]/p["resolution"])
-      yb = ya + random.normal(scale=p["stdPatchShift"]/p["resolution"])
-      patch_b = get_patch(dem, xb, yb, p)
-    patches_b[i, :, :] = patch_b
+    for i in range(batch_size):
+        # find first patch
+        patch_a = None
+        while patch_a is None:
+        xa = random.uniform(0, dem.shape[0])
+        ya = random.uniform(0, dem.shape[1])
+        patch_a = get_patch(dem, xa, ya, p)
+        patches_a[i, :, :] = patch_a
 
-    # compute output function
-    distances[i] = np.linalg.norm([xb-xa, yb-ya])
+        # find second patch close to first
+        patch_b = None
+        while patch_b is None:
+        xb = xa + random.normal(scale=p["stdPatchShift"]/p["resolution"])
+        yb = ya + random.normal(scale=p["stdPatchShift"]/p["resolution"])
+        patch_b = get_patch(dem, xb, yb, p)
+        patches_b[i, :, :] = patch_b
 
-  return (patches_a, patches_b, distances)
+        # compute output function
+        distances[i] = np.linalg.norm([xb-xa, yb-ya])
+
+    return (patches_a, patches_b, distances)
