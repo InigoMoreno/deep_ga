@@ -32,11 +32,13 @@ def ply_to_image(ply_file, resolution=1):
     bins = (np.arange(0, np.max(x), step=resolution),
             np.arange(0, np.max(y), step=resolution))
 
-    sum_heights = np.histogram2d(x, y, bins=bins, weights=z)[0]
-    sum_reds = np.histogram2d(x, y, bins=bins, weights=r)[0]
-    sum_greens = np.histogram2d(x, y, bins=bins, weights=g)[0]
-    sum_blues = np.histogram2d(x, y, bins=bins, weights=b)[0]
-    count_points = np.histogram2d(x, y, bins=bins)[0]
+    with warnings.catch_warnings():
+        warnings.simplefilter('ignore')
+        sum_heights = np.histogram2d(x, y, bins=bins, weights=z)[0]
+        sum_reds = np.histogram2d(x, y, bins=bins, weights=r)[0]
+        sum_greens = np.histogram2d(x, y, bins=bins, weights=g)[0]
+        sum_blues = np.histogram2d(x, y, bins=bins, weights=b)[0]
+        count_points = np.histogram2d(x, y, bins=bins)[0]
 
     dem = sum_heights/count_points
     img = np.dstack((sum_reds / count_points, sum_greens /
