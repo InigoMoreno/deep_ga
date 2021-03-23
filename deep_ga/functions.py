@@ -1,5 +1,6 @@
 import numpy as np
 from plyfile import PlyData, PlyElement
+import warnings
 
 
 def ply_to_image(ply_file, resolution=1):
