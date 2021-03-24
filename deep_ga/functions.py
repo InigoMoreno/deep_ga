@@ -46,7 +46,7 @@ def ply_to_image(ply_file, resolution=1):
     img = np.dstack((sum_reds / count_points, sum_greens /
                     count_points, sum_blues / count_points))
 
-    return (dem, img, displacement)
+    return (dem.astype('float32'), img.astype('float32'), displacement)
 
 
 def get_valid_filename(s):
