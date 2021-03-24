@@ -46,3 +46,14 @@ def ply_to_image(ply_file, resolution=1):
                     count_points, sum_blues / count_points))
 
     return (dem, img, displacement)
+
+
+def get_valid_filename(s):
+    """
+    Return the given string converted to a string that can be used for a clean
+    filename.
+
+    From https://github.com/django/django/blob/main/django/utils/text.py
+    """
+    s = str(s).strip().replace(' ', '_')
+    return re.sub(r'(?u)[^-\w.]', '', s)
