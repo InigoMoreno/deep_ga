@@ -3,7 +3,7 @@ from tensorflow import keras
 import numpy as np
 
 
-def get_patch(dem, x, y, p):
+def get_patch(dem, x, y, p, displacement=(0, 0)):
     """Get patch from an elevation map
 
     Args:
@@ -17,7 +17,9 @@ def get_patch(dem, x, y, p):
     """
     # compute patch
     patch = cv2.getRectSubPix(
-        dem, (p["mapLengthPixels"], p["mapLengthPixels"]), (x, y))
+        dem, (p["mapLengthPixels"], p["mapLengthPixels"]),
+        (displacement[1] + y / p["resolution"],
+         displacement[0] + x / p["resolution"]))
 
     # discard patch if there are two many holes
     nanPercentage = np.count_nonzero(np.isnan(patch))/p["mapLengthPixels"]**2
