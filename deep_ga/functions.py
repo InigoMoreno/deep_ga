@@ -42,9 +42,9 @@ def ply_to_image(ply_file, resolution=1):
         sum_blues = np.histogram2d(x, y, bins=bins, weights=b)[0]
         count_points = np.histogram2d(x, y, bins=bins)[0]
 
-    dem = sum_heights/count_points
-    img = np.dstack((sum_reds / count_points, sum_greens /
-                    count_points, sum_blues / count_points))
+        dem = sum_heights/count_points
+        img = np.dstack((sum_reds / count_points, sum_greens /
+                        count_points, sum_blues / count_points))
 
     return (dem.astype('float32'), img.astype('float32'), displacement)
 
