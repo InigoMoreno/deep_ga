@@ -18,8 +18,8 @@ def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
     # compute patch
     patch = cv2.getRectSubPix(
         dem, (p["mapLengthPixels"], p["mapLengthPixels"]),
-        (displacement[1] + y / p["resolution"],
-         displacement[0] + x / p["resolution"]))
+        ((-displacement[1] + y) / p["resolution"],
+         (-displacement[0] + x) / p["resolution"]))
 
     if skipChecks:
         return patch
