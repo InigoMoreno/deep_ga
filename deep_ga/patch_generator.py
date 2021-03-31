@@ -105,7 +105,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
     Args:
         batch_size (int): Size of the batch
         dems (numpy array): local elevation maps
-        gps (numpy array): position information of local elevation maps,
+        gps (numpy array): position information of local elevation maps
         global_dem (numpy array): global elevation map
         displacement (tuple): tuple containing displacement between gps data and dem 
         params (dict): parameters
@@ -140,7 +140,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         while global_patch is None:
             dx, dy = random.normal(
                 scale=p["stdPatchShift"]/p["resolution"], size=2)
-            global_patch = deep_ga.get_patch(
+            global_patch = get_patch(
                 global_dem, gps[idx, 1]+dx, gps[idx, 2]+dy, p, displacement)
         global_patches[i, :, :] = global_patch
 
@@ -180,17 +180,22 @@ class PatchDataGenerator(keras.utils.Sequence):
 class LocalGlobalPatchDataGenerator(keras.utils.Sequence):
     """Generates patch data for Keras"""
 
-    def __init__(self, size, dem, batch_size, params):
+    def __init__(self, size, batch_size, dems, gps, global_dem, params):
         """Initialize
 
         Args:
             size (int): Total size of data (data per epoch)
-            dem (numpy array): Depth elevation map
             batch_size (int): Size of each batch
+            dems (numpy array): local elevation maps
+            gps (numpy array): position information of local elevation maps
+            global_dem (numpy array): global elevation map
             params (dict): parameters
         """
         self.size = size
-        self.dem = dem
+        self.dems = dems
+        self.gps = gps
+        self.global_dem = global_dem
+        self.displacement = displacement
         self.batch_size = batch_size
         self.params = params
 
@@ -200,5 +205,6 @@ class LocalGlobalPatchDataGenerator(keras.utils.Sequence):
 
     def __getitem__(self, index):
         """Generate one batch of data"""
-        Xa, Xb, y = get_batch(self.batch_size, self.dem, self.params)
+        Xa, Xb, y = get_batch_local_global(
+            self.batch_size, self.dems, self.gps, self.global_dem, self.displacement, self.params)
         return [Xa, Xb], y
