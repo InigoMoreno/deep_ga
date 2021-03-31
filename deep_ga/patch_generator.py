@@ -127,7 +127,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         (batch_size, p["mapLengthPixels"], p["mapLengthPixels"]))
     distances = np.empty((batch_size,))
 
-    for i in progressbar(range(batch_size)):
+    for i in range(batch_size):
         # find local patch
         # we asume the dems have already been filtered
         idx = random.randint(dems.shape[0])
