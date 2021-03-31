@@ -99,7 +99,85 @@ def get_batch(batch_size, dem, p, seed=None):
     return (patches_a, patches_b, distances)
 
 
+def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, seed=None):
+    """Get a batch of local and global patches for training
+
+    Args:
+        batch_size (int): Size of the batch
+        dems (numpy array): local elevation maps
+        gps (numpy array): position information of local elevation maps,
+        global_dem (numpy array): global elevation map
+        displacement (tuple): tuple containing displacement between gps data and dem 
+        params (dict): parameters
+        seed (int, optional): Seed to use for randomness. Defaults to None.
+
+    Returns:
+        (tuple): tuple containing
+            patches_local (numpy array): local patches of the batch
+            patches_global (numpy array): global patches of the batch
+            distances (double): distances between local and global patches
+    """
+    # initialize random
+    random = np.random.RandomState(seed)
+
+    # initialize data
+    local_patches = np.empty(
+        (batch_size, p["local_mapLengthPixels"], p["local_mapLengthPixels"]))
+    global_patches = np.empty(
+        (batch_size, p["mapLengthPixels"], p["mapLengthPixels"]))
+    distances = np.empty((batch_size,))
+
+    for i in progressbar(range(batch_size)):
+        # find local patch
+        # we asume the dems have already been filtered
+        idx = random.randint(dems.shape[0])
+        local_patch = dems[i, :, :]
+        local_patch -= np.nanmin(local_patch)
+        local_patches[i, :, :] = dems[idx, :, :]
+
+        # find global patch close to local
+        global_patch = None
+        while global_patch is None:
+            dx, dy = random.normal(
+                scale=p["stdPatchShift"]/p["resolution"], size=2)
+            global_patch = deep_ga.get_patch(
+                global_dem, gps[idx, 1]+dx, gps[idx, 2]+dy, p, displacement)
+        global_patches[i, :, :] = global_patch
+
+        # compute output function
+        distances[i] = np.linalg.norm([dx, dy])
+
+    return (local_patches, global_patches, distances)
+
+
 class PatchDataGenerator(keras.utils.Sequence):
+    """Generates patch data for Keras"""
+
+    def __init__(self, size, dem, batch_size, params):
+        """Initialize
+
+        Args:
+            size (int): Total size of data (data per epoch)
+            dem (numpy array): Depth elevation map
+            batch_size (int): Size of each batch
+            params (dict): parameters
+        """
+        self.size = size
+        self.dem = dem
+        self.batch_size = batch_size
+        self.params = params
+
+    def __len__(self):
+        """Denotes the number of batches per epoch"""
+        return int(np.floor(self.size / self.batch_size))
+
+    def __getitem__(self, index):
+        """Generate one batch of data"""
+        Xa, Xb, y = get_batch(self.batch_size, self.dem, self.params)
+        return [Xa, Xb], y
+
+
+class LocalGlobalPatchDataGenerator(keras.utils.Sequence):
     """Generates patch data for Keras"""
 
     def __init__(self, size, dem, batch_size, params):
