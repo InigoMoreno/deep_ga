@@ -37,9 +37,20 @@ class SymConv2D(keras.layers.Layer):
         })
         return config
 
+
+class NanToZero(keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super(NanToZero, self).__init__(**kwargs)
+
+    def call(self, x):
+        return tf.where(tf.math.is_nan(x), tf.zeros_like(x), x)
+
+    def get_config(self):
+        config = super().get_config().copy()
+        return config
+
+
 # This layer computes the euclidean distance between two vectors
-
-
 class EuclideanDistanceLayer(keras.layers.Layer):
     def __init__(self, **kwargs):
         super(EuclideanDistanceLayer, self).__init__(**kwargs)
