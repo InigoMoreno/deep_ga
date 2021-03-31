@@ -1,4 +1,5 @@
 from tensorflow import keras
+import tensorflow as tf
 import keras.backend as K
 
 # Instead of having a normal 3x3 kernel, this conv layer is forced to
