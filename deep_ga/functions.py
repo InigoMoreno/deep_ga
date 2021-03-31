@@ -18,12 +18,16 @@ def ply_to_image(ply_file, resolution=1):
             displacement (tuple): x,y,z displacement used to generate dem and image
     """
     points = PlyData.read(ply_file).elements[0]
+
+    def find_property(substr):
+        return next(p.name for p in points.properties if substr in p.name)
+
     x = points.data['x']
     y = points.data['y']
     z = points.data['z']
-    r = points.data['diffuse_red']
-    g = points.data['diffuse_green']
-    b = points.data['diffuse_blue']
+    r = points.data[find_property("red")]
+    g = points.data[find_property("green")]
+    b = points.data[find_property("blue")]
 
     n_points = points.count
     displacement = (np.min(x, 0), np.min(y, 0), np.min(z, 0))
