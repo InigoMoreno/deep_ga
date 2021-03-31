@@ -180,7 +180,7 @@ class PatchDataGenerator(keras.utils.Sequence):
 class LocalGlobalPatchDataGenerator(keras.utils.Sequence):
     """Generates patch data for Keras"""
 
-    def __init__(self, size, batch_size, dems, gps, global_dem, params):
+    def __init__(self, size, batch_size, dems, gps, global_dem, displacement, params):
         """Initialize
 
         Args:
@@ -189,6 +189,7 @@ class LocalGlobalPatchDataGenerator(keras.utils.Sequence):
             dems (numpy array): local elevation maps
             gps (numpy array): position information of local elevation maps
             global_dem (numpy array): global elevation map
+            displacement (tuple): tuple containing displacement between gps data and dem 
             params (dict): parameters
         """
         self.size = size
