@@ -24,12 +24,22 @@ class SymConv2D(keras.layers.Layer):
 
     def call(self, x):
         # duplicate rows 0 and 2
+
+        isnan = tf.math.is_nan(x)
+        isnan = tf.cast(isnan, tf.uint8)
+        isnan = tf.nn.max_pool(isnan, ksize=3, strides=1, padding="VALID")
+        isnan = tf.cast(isnan, tf.bool)
+
+        x = tf.where(tf.math.is_nan(x), tf.zeros_like(x), x)
+
         r0 = K.stack((self.w[0], self.w[1], self.w[2]), axis=0)
         r1 = K.stack((self.w[3], K.zeros_like(self.w[0]), -self.w[3]), axis=0)
         r2 = K.stack((-self.w[2], -self.w[1], -self.w[0]), axis=0)
         kernel = K.stack((r0, r1, r2), axis=1)
 
-        return K.conv2d(x, kernel)
+        conv = K.conv2d(x, kernel)
+        conv = tf.where(isnan, tf.zeros_like(conv), conv)
+        return conv
 
     def get_config(self):
         config = super().get_config().copy()
@@ -62,3 +72,10 @@ class EuclideanDistanceLayer(keras.layers.Layer):
     def get_config(self):
         config = super().get_config().copy()
         return config
+
+
+custom_objects = {
+    "SymConv2D": SymConv2D,
+    "EuclideanDistanceLayer": EuclideanDistanceLayer,
+    "NanToZero": NanToZero
+}
