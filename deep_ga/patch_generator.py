@@ -1,6 +1,7 @@
 import cv2
 from tensorflow import keras
 import numpy as np
+import math
 
 
 def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
@@ -25,7 +26,7 @@ def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
         return patch
 
     # discard patch if there are two many holes
-    nanPercentage = np.count_nonzero(np.isnan(patch))/p["mapLengthPixels"]**2
+    nanPercentage = np.count_nonzero(np.isnan(patch)) / p["mapLengthPixels"]**2
     if nanPercentage > p["maxNanPercentage"]:
         return None
 
@@ -35,14 +36,14 @@ def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
     patch -= np.min(patch)
 
     # compute slope
-    slopeX = cv2.Sobel(patch, cv2.CV_32F, 1, 0, ksize=3)/p["resolution"]
-    slopeY = cv2.Sobel(patch, cv2.CV_32F, 0, 1, ksize=3)/p["resolution"]
+    slopeX = cv2.Sobel(patch, cv2.CV_32F, 1, 0, ksize=3) / p["resolution"]
+    slopeY = cv2.Sobel(patch, cv2.CV_32F, 0, 1, ksize=3) / p["resolution"]
     slope = cv2.magnitude(slopeX, slopeY)
 
     # discard patch if there are not enough slopes
     _, slopeThresh = cv2.threshold(
         slope, p["minSlopeThreshold"], 0, cv2.THRESH_TOZERO)
-    slopePercentage = np.count_nonzero(slopeThresh)/p["mapLengthPixels"]**2
+    slopePercentage = np.count_nonzero(slopeThresh) / p["mapLengthPixels"]**2
     if slopePercentage < p["minSlopePercentage"]:
         return None
     if slopePercentage > p["maxSlopePercentage"]:
@@ -88,13 +89,13 @@ def get_batch(batch_size, dem, p, seed=None):
         # find second patch close to first
         patch_b = None
         while patch_b is None:
-            xb = xa + random.normal(scale=p["stdPatchShift"]/p["resolution"])
-            yb = ya + random.normal(scale=p["stdPatchShift"]/p["resolution"])
+            xb = xa + random.normal(scale=p["stdPatchShift"] / p["resolution"])
+            yb = ya + random.normal(scale=p["stdPatchShift"] / p["resolution"])
             patch_b = get_patch(dem, xb, yb, p)
         patches_b[i, :, :] = patch_b
 
         # compute output function
-        distances[i] = np.linalg.norm([xb-xa, yb-ya])
+        distances[i] = np.linalg.norm([xb - xa, yb - ya])
 
     return (patches_a, patches_b, distances)
 
@@ -138,10 +139,19 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         # find global patch close to local
         global_patch = None
         while global_patch is None:
-            dx, dy = random.normal(
-                scale=p["stdPatchShift"]/p["resolution"], size=2)
+
+            if p["booleanDist"]:
+                if random.choice([True, False]):
+                    dx, dy = 0, 0
+                else:
+                    angle = random.uniform(0, 2 * math.pi)
+                    dx = p["stdPatchShift"] * math.cos(angle)
+                    dy = p["stdPatchShift"] * math.sin(angle)
+            else:
+                dx, dy = random.normal(
+                    scale=p["stdPatchShift"] / p["resolution"], size=2)
             global_patch = get_patch(
-                global_dem, gps[idx, 1]+dx, gps[idx, 2]+dy, p, displacement)
+                global_dem, gps[idx, 1] + dx, gps[idx, 2] + dy, p, displacement)
         global_patches[i, :, :] = global_patch
 
         # compute output function
