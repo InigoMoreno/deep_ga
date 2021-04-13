@@ -2,38 +2,43 @@ import cv2
 from tensorflow import keras
 import numpy as np
 import math
-from numba import njit
+from numba import cuda
 
 
-def raycast_occlusion(patch, height):
-    out = np.copy(patch)
+@cuda.jit
+def gpu_occlusion(patch, height):
     W, H = patch.shape
 
     cx = round((W - 1) / 2)
     cy = round((H - 1) / 2)
     c = (cx, cy, patch[cx, cy] + height)
 
-    for x in range(W):
-        for y in range(H):
-            p = (x, y, patch[x, y])
-            to = (c[0] - p[0], c[1] - p[1], c[2] - p[2])
-            dist = math.sqrt(math.pow(to[0], 2) +
-                             math.pow(to[1], 2) + math.pow(to[1], 2))
-            if dist == 0:
+    x, y = cuda.grid(2)
+    if x < W and y < H:
+        p = (x, y, patch[x, y])
+        to = (c[0] - p[0], c[1] - p[1], c[2] - p[2])
+        dist = math.sqrt(math.pow(to[0], 2) +
+                         math.pow(to[1], 2) + math.pow(to[1], 2))
+        dir = (to[0] / dist, to[1] / dist, to[2] / dist)
+        for h in range(0, math.ceil(dist)):
+            step_pos_ray = (p[0] + h * dir[0], p[1] +
+                            h * dir[1], p[2] + h * dir[2])
+            sx, sy = round(step_pos_ray[0]), round(step_pos_ray[1])
+            if (sx, sy) == (x, y):
                 continue
-            dir = (to[0] / dist, to[1] / dist, to[2] / dist)
-            prev = (x, y)
-            for h in range(0, math.ceil(dist)):
-                step_pos_ray = (p[0] + h * dir[0], p[1] +
-                                h * dir[1], p[2] + h * dir[2])
-                sx, sy = round(step_pos_ray[0]), round(step_pos_ray[1])
-                if (sx, sy) == prev:
-                    continue
-                prev = (sx, sy)
-                if step_pos_ray[2] <= patch[sx, sy]:
-                    out[x, y] = np.nan
-                    break
-    return out
+            if step_pos_ray[2] <= patch[sx, sy]:
+                patch[x, y] = np.nan
+                break
+
+
+def raycast_occlusion(arr, height):
+    an_array = cuda.to_device(arr)
+    threadsperblock = (32, 32)
+    blockspergrid_x = math.ceil(an_array.shape[0] / threadsperblock[0])
+    blockspergrid_y = math.ceil(an_array.shape[1] / threadsperblock[1])
+    blockspergrid = (blockspergrid_x, blockspergrid_y)
+    gpu_occlusion[blockspergrid, threadsperblock](an_array, height)
+    return np.array(an_array)
 
 
 def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
