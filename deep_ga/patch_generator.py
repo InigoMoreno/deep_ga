@@ -2,6 +2,38 @@ import cv2
 from tensorflow import keras
 import numpy as np
 import math
+from numba import njit
+
+
+def raycast_occlusion(patch, height):
+    out = np.copy(patch)
+    W, H = patch.shape
+
+    cx = round((W - 1) / 2)
+    cy = round((H - 1) / 2)
+    c = (cx, cy, patch[cx, cy] + height)
+
+    for x in range(W):
+        for y in range(H):
+            p = (x, y, patch[x, y])
+            to = (c[0] - p[0], c[1] - p[1], c[2] - p[2])
+            dist = math.sqrt(math.pow(to[0], 2) +
+                             math.pow(to[1], 2) + math.pow(to[1], 2))
+            if dist == 0:
+                continue
+            dir = (to[0] / dist, to[1] / dist, to[2] / dist)
+            prev = (x, y)
+            for h in range(0, math.ceil(dist)):
+                step_pos_ray = (p[0] + h * dir[0], p[1] +
+                                h * dir[1], p[2] + h * dir[2])
+                sx, sy = round(step_pos_ray[0]), round(step_pos_ray[1])
+                if (sx, sy) == prev:
+                    continue
+                prev = (sx, sy)
+                if step_pos_ray[2] <= patch[sx, sy]:
+                    out[x, y] = np.nan
+                    break
+    return out
 
 
 def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
@@ -84,6 +116,8 @@ def get_batch(batch_size, dem, p, seed=None):
             xa = random.uniform(0, dem.shape[0])
             ya = random.uniform(0, dem.shape[1])
             patch_a = get_patch(dem, xa, ya, p)
+        if "raycastHeight" in p.keys() and p["raycastHeight"] is not None:
+            patch_a = raycast_occlusion(patch_a, p["raycastHeight"])
         patches_a[i, :, :] = patch_a
 
         # find second patch close to first
