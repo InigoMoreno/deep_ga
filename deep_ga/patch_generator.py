@@ -121,6 +121,8 @@ def get_batch(batch_size, dem, p, seed=None):
             xa = random.uniform(0, dem.shape[0])
             ya = random.uniform(0, dem.shape[1])
             patch_a = get_patch(dem, xa, ya, p)
+        if "augment_a" in p.keys() and p["augment_a"] is not None:
+            patch_a = p["augment_a"].augment_image(patch_a)
         if "raycastHeight" in p.keys() and p["raycastHeight"] is not None:
             patch_a = raycast_occlusion(patch_a, p["raycastHeight"])
         patches_a[i, :, :] = patch_a
@@ -131,6 +133,8 @@ def get_batch(batch_size, dem, p, seed=None):
             xb = xa + random.normal(scale=p["stdPatchShift"] / p["resolution"])
             yb = ya + random.normal(scale=p["stdPatchShift"] / p["resolution"])
             patch_b = get_patch(dem, xb, yb, p)
+        if "augment_b" in p.keys() and p["augment_b"] is not None:
+            patch_b = p["augment_b"].augment_image(patch_b)
         patches_b[i, :, :] = patch_b
 
         # compute output function
@@ -173,7 +177,9 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         idx = random.randint(dems.shape[0])
         local_patch = dems[i, :, :]
         local_patch -= np.nanmin(local_patch)
-        local_patches[i, :, :] = dems[idx, :, :]
+        if "augment_a" in p.keys() and p["augment_a"] is not None:
+            local_patch = p["augment_a"].augment_image(local_patch)
+        local_patches[i, :, :] = local_patch
 
         # find global patch close to local
         global_patch = None
@@ -191,6 +197,8 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
                     scale=p["stdPatchShift"] / p["resolution"], size=2)
             global_patch = get_patch(
                 global_dem, gps[idx, 1] + dx, gps[idx, 2] + dy, p, displacement)
+        if "augment_b" in p.keys() and p["augment_b"] is not None:
+            global_patch = p["augment_b"].augment_image(global_patch)
         global_patches[i, :, :] = global_patch
 
         # compute output function
