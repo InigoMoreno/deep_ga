@@ -130,9 +130,17 @@ def get_batch(batch_size, dem, p, seed=None):
         # find second patch close to first
         patch_b = None
         while patch_b is None:
-            xb = xa + random.normal(scale=p["stdPatchShift"] / p["resolution"])
-            yb = ya + random.normal(scale=p["stdPatchShift"] / p["resolution"])
-            patch_b = get_patch(dem, xb, yb, p)
+            if p["booleanDist"]:
+                if random.choice([True, False]):
+                    dx, dy = 0, 0
+                else:
+                    angle = random.uniform(0, 2 * math.pi)
+                    dx = p["stdPatchShift"] * math.cos(angle)
+                    dy = p["stdPatchShift"] * math.sin(angle)
+            else:
+                dx, dy = random.normal(
+                    scale=p["stdPatchShift"] / p["resolution"], size=2)
+            patch_b = get_patch(dem, xa + dx, ya + dx, p)
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             patch_b = p["augment_b"].augment_image(patch_b)
         patches_b[i, :, :] = patch_b
