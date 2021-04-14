@@ -146,7 +146,7 @@ def get_batch(batch_size, dem, p, seed=None):
         patches_b[i, :, :] = patch_b
 
         # compute output function
-        distances[i] = np.linalg.norm([dx, dx])
+        distances[i] = np.linalg.norm([dx, dy])
 
     return (patches_a, patches_b, distances)
 
