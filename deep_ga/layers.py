@@ -113,6 +113,18 @@ class NanToZero(keras.layers.Layer):
         return config
 
 
+class IsNaNMask(keras.layers.Layer):
+    def __init__(self, **kwargs):
+        super(IsNaNMask, self).__init__(**kwargs)
+
+    def call(self, x):
+        return tf.cast(tf.math.is_nan(x), tf.float32)
+
+    def get_config(self):
+        config = super().get_config().copy()
+        return config
+
+
 # This layer computes the euclidean distance between two vectors
 class EuclideanDistanceLayer(keras.layers.Layer):
     def __init__(self, **kwargs):
@@ -130,5 +142,6 @@ custom_objects = {
     "SymConv2D": SymConv2D,
     "PConv2D": PConv2D,
     "EuclideanDistanceLayer": EuclideanDistanceLayer,
-    "NanToZero": NanToZero
+    "NanToZero": NanToZero,
+    "IsNaNMask": IsNaNMask
 }
