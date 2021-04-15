@@ -9,6 +9,7 @@ setup(
                       'opencv-python',
                       'Keras',
                       'tensorflow',
+                      'deepdiff'
                       ],
     author='Iñigo Moreno i Caireta',
     author_email='ignigomoreno@gmail.com',
