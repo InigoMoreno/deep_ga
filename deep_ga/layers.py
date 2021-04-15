@@ -24,6 +24,9 @@ class SymConv2D(keras.layers.Layer):
 
     def call(self, x):
         # duplicate rows 0 and 2
+        old_opts = tf.config.optimizer.get_experimental_options()
+        tf.config.optimizer.set_experimental_options(
+            {'layout_optimizer': False})
 
         isnan = tf.math.is_nan(x)
         isnan = tf.cast(isnan, tf.uint8)
@@ -39,6 +42,8 @@ class SymConv2D(keras.layers.Layer):
 
         conv = K.conv2d(x, kernel)
         conv = tf.where(isnan, tf.zeros_like(conv), conv)
+
+        tf.config.optimizer.set_experimental_options(old_opts)
         return conv
 
     def get_config(self):
