@@ -12,14 +12,29 @@ import keras.backend as K
 
 
 class SymConv2D(keras.layers.Layer):
-    def __init__(self, filters, **kwargs):
+    def __init__(self, filters, sobelInitial=False, ** kwargs):
         self.filters = filters
+        self.sobelInitial = sobelInitial
         super(SymConv2D, self).__init__(**kwargs)
 
     def build(self, input_shape):
+        assert input_shape[-1] == 1, "Only implemented for one input"
         shapew = (4,) + (input_shape[-1], self.filters)
-        self.w = self.add_weight(name='kernel', shape=shapew,
-                                      initializer='glorot_uniform')
+        if self.sobelInitial:
+            assert self.filters < 5, "Only four sobel filters available"
+            sobel_weights = np.array([
+                [1, 3, 1, 0],  # x
+                [1, 0, -1, 3],  # y
+                [3, 1, 0, 1],  # xy
+                [0, 1, 3, -1]  # yx
+            ], np.float32)
+            sobel_weights = np.reshape(sobel_weights.transpose(), (4, 1, 4))
+            sobel_weights = sobel_weights[:, :, :self.filters]
+            sobel_weights = np.repeat(sobel_weights, input_shape[-1], axis=1)
+            self.w = tf.Variable(initial_value=sobel_weights)
+        else:
+            self.w = self.add_weight(name='kernel', shape=shapew,
+                                     initializer='glorot_uniform')
         super(SymConv2D, self).build(input_shape)
 
     def call(self, x):
