@@ -2,6 +2,43 @@ import cv2
 from tensorflow import keras
 import numpy as np
 import math
+from numba import cuda
+
+
+@cuda.jit
+def gpu_occlusion(patch, height):
+    W, H = patch.shape
+
+    cx = round((W - 1) / 2)
+    cy = round((H - 1) / 2)
+    c = (cx, cy, patch[cx, cy] + height)
+
+    x, y = cuda.grid(2)
+    if x < W and y < H:
+        p = (x, y, patch[x, y])
+        to = (c[0] - p[0], c[1] - p[1], c[2] - p[2])
+        dist = math.sqrt(math.pow(to[0], 2) +
+                         math.pow(to[1], 2) + math.pow(to[1], 2))
+        dir = (to[0] / dist, to[1] / dist, to[2] / dist)
+        for h in range(0, math.ceil(dist)):
+            step_pos_ray = (p[0] + h * dir[0], p[1] +
+                            h * dir[1], p[2] + h * dir[2])
+            sx, sy = round(step_pos_ray[0]), round(step_pos_ray[1])
+            if (sx, sy) == (x, y):
+                continue
+            if step_pos_ray[2] <= patch[sx, sy]:
+                patch[x, y] = np.nan
+                break
+
+
+def raycast_occlusion(arr, height):
+    an_array = cuda.to_device(arr)
+    threadsperblock = (32, 32)
+    blockspergrid_x = math.ceil(an_array.shape[0] / threadsperblock[0])
+    blockspergrid_y = math.ceil(an_array.shape[1] / threadsperblock[1])
+    blockspergrid = (blockspergrid_x, blockspergrid_y)
+    gpu_occlusion[blockspergrid, threadsperblock](an_array, height)
+    return np.array(an_array)
 
 
 def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
@@ -84,18 +121,32 @@ def get_batch(batch_size, dem, p, seed=None):
             xa = random.uniform(0, dem.shape[0])
             ya = random.uniform(0, dem.shape[1])
             patch_a = get_patch(dem, xa, ya, p)
-        patches_a[i, :, :] = patch_a
+        if "augment_a" in p.keys() and p["augment_a"] is not None:
+            patch_a = p["augment_a"].augment_image(patch_a)
+        if "raycastHeight" in p.keys() and p["raycastHeight"] is not None:
+            patch_a = raycast_occlusion(patch_a, p["raycastHeight"])
+        patches_a[i, :, :] = patch_a - np.nanmean(patch_a)
 
         # find second patch close to first
         patch_b = None
         while patch_b is None:
-            xb = xa + random.normal(scale=p["stdPatchShift"] / p["resolution"])
-            yb = ya + random.normal(scale=p["stdPatchShift"] / p["resolution"])
-            patch_b = get_patch(dem, xb, yb, p)
-        patches_b[i, :, :] = patch_b
+            if p["booleanDist"]:
+                if random.choice([True, False]):
+                    dx, dy = 0, 0
+                else:
+                    angle = random.uniform(0, 2 * math.pi)
+                    dx = p["stdPatchShift"] * math.cos(angle)
+                    dy = p["stdPatchShift"] * math.sin(angle)
+            else:
+                dx, dy = random.normal(
+                    scale=p["stdPatchShift"] / p["resolution"], size=2)
+            patch_b = get_patch(dem, xa + dx, ya + dx, p)
+        if "augment_b" in p.keys() and p["augment_b"] is not None:
+            patch_b = p["augment_b"].augment_image(patch_b)
+        patches_b[i, :, :] = patch_b - np.nanmean(patch_b)
 
         # compute output function
-        distances[i] = np.linalg.norm([xb - xa, yb - ya])
+        distances[i] = np.linalg.norm([dx, dy])
 
     return (patches_a, patches_b, distances)
 
@@ -134,7 +185,9 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         idx = random.randint(dems.shape[0])
         local_patch = dems[i, :, :]
         local_patch -= np.nanmin(local_patch)
-        local_patches[i, :, :] = dems[idx, :, :]
+        if "augment_a" in p.keys() and p["augment_a"] is not None:
+            local_patch = p["augment_a"].augment_image(local_patch)
+        local_patches[i, :, :] = local_patch - np.nanmean(local_patch)
 
         # find global patch close to local
         global_patch = None
@@ -152,7 +205,9 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
                     scale=p["stdPatchShift"] / p["resolution"], size=2)
             global_patch = get_patch(
                 global_dem, gps[idx, 1] + dx, gps[idx, 2] + dy, p, displacement)
-        global_patches[i, :, :] = global_patch
+        if "augment_b" in p.keys() and p["augment_b"] is not None:
+            global_patch = p["augment_b"].augment_image(global_patch)
+        global_patches[i, :, :] = global_patch - np.nanmean(global_patch)
 
         # compute output function
         distances[i] = np.linalg.norm([dx, dy])
