@@ -9,7 +9,8 @@ setup(
                       'opencv-python',
                       'Keras',
                       'tensorflow',
-                      'deepdiff'
+                      'deepdiff',
+                      'numba'
                       ],
     author='Iñigo Moreno i Caireta',
     author_email='ignigomoreno@gmail.com',
