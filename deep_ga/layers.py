@@ -113,9 +113,9 @@ class NanToZero(keras.layers.Layer):
         return config
 
 
-class IsNaNMask(keras.layers.Layer):
+class IsNanMask(keras.layers.Layer):
     def __init__(self, **kwargs):
-        super(IsNaNMask, self).__init__(**kwargs)
+        super(IsNanMask, self).__init__(**kwargs)
 
     def call(self, x):
         return tf.cast(tf.math.is_nan(x), tf.float32)
@@ -143,5 +143,5 @@ custom_objects = {
     "PConv2D": PConv2D,
     "EuclideanDistanceLayer": EuclideanDistanceLayer,
     "NanToZero": NanToZero,
-    "IsNaNMask": IsNaNMask
+    "IsNanMask": IsNanMask
 }
