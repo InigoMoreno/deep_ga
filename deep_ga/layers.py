@@ -1,6 +1,7 @@
 from tensorflow import keras
 import tensorflow as tf
 import keras.backend as K
+import numpy as np
 
 # Instead of having a normal 3x3 kernel, this conv layer is forced to
 # have a kernel that only performs differentiations, i.e. the kernel
