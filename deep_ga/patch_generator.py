@@ -125,7 +125,7 @@ def get_batch(batch_size, dem, p, seed=None):
             patch_a = p["augment_a"].augment_image(patch_a)
         if "raycastHeight" in p.keys() and p["raycastHeight"] is not None:
             patch_a = raycast_occlusion(patch_a, p["raycastHeight"])
-        patches_a[i, :, :] = patch_a
+        patches_a[i, :, :] = patch_a - np.nanmean(patch_a)
 
         # find second patch close to first
         patch_b = None
@@ -143,7 +143,7 @@ def get_batch(batch_size, dem, p, seed=None):
             patch_b = get_patch(dem, xa + dx, ya + dx, p)
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             patch_b = p["augment_b"].augment_image(patch_b)
-        patches_b[i, :, :] = patch_b
+        patches_b[i, :, :] = patch_b - np.nanmean(patch_b)
 
         # compute output function
         distances[i] = np.linalg.norm([dx, dy])
@@ -187,7 +187,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         local_patch -= np.nanmin(local_patch)
         if "augment_a" in p.keys() and p["augment_a"] is not None:
             local_patch = p["augment_a"].augment_image(local_patch)
-        local_patches[i, :, :] = local_patch
+        local_patches[i, :, :] = local_patch - np.nanmean(local_patch)
 
         # find global patch close to local
         global_patch = None
@@ -207,7 +207,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
                 global_dem, gps[idx, 1] + dx, gps[idx, 2] + dy, p, displacement)
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             global_patch = p["augment_b"].augment_image(global_patch)
-        global_patches[i, :, :] = global_patch
+        global_patches[i, :, :] = global_patch - np.nanmean(global_patch)
 
         # compute output function
         distances[i] = np.linalg.norm([dx, dy])
