@@ -49,6 +49,42 @@ class SymConv2D(keras.layers.Layer):
         return config
 
 
+class PConv2D(keras.layers.Layer):
+    def __init__(self, filters, **kwargs):
+        self.filters = filters
+        super(PConv2D, self).__init__(**kwargs)
+
+    def build(self, input_shape):
+        shapew = (9,) + (input_shape[-1], self.filters)
+        self.w = self.add_weight(name='kernel', shape=shapew,
+                                      initializer='glorot_uniform')
+        super(PConv2D, self).build(input_shape)
+
+    def call(self, x):
+        isnan = tf.math.is_nan(x)
+        isnan = tf.cast(isnan, tf.uint8)
+        isnan = tf.nn.max_pool(isnan, ksize=3, strides=1, padding="VALID")
+        isnan = tf.cast(isnan, tf.bool)
+
+        x = tf.where(tf.math.is_nan(x), tf.zeros_like(x), x)
+
+        r0 = K.stack((self.w[0], self.w[1], self.w[2]), axis=0)
+        r1 = K.stack((self.w[3], self.w[4], self.w[5]), axis=0)
+        r2 = K.stack((self.w[6], self.w[7], self.w[8]), axis=0)
+        kernel = K.stack((r0, r1, r2), axis=1)
+
+        conv = K.conv2d(x, kernel)
+        conv = tf.where(isnan, tf.zeros_like(conv), conv)
+        return conv
+
+    def get_config(self):
+        config = super().get_config().copy()
+        config.update({
+            'filters': self.filters
+        })
+        return config
+
+
 class NanToZero(keras.layers.Layer):
     def __init__(self, **kwargs):
         super(NanToZero, self).__init__(**kwargs)
@@ -76,6 +112,7 @@ class EuclideanDistanceLayer(keras.layers.Layer):
 
 custom_objects = {
     "SymConv2D": SymConv2D,
+    "PConv2D": PConv2D,
     "EuclideanDistanceLayer": EuclideanDistanceLayer,
     "NanToZero": NanToZero
 }
