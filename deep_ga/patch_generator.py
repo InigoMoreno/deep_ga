@@ -140,7 +140,7 @@ def get_batch(batch_size, dem, p, seed=None):
             else:
                 dx, dy = random.normal(
                     scale=p["stdPatchShift"] / p["resolution"], size=2)
-            patch_b = get_patch(dem, xa + dx, ya + dx, p)
+            patch_b = get_patch(dem, xa + dx, ya + dy, p)
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             patch_b = p["augment_b"].augment_image(patch_b)
         patches_b[i, :, :] = patch_b - np.nanmean(patch_b)
