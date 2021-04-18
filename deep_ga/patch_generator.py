@@ -70,7 +70,7 @@ def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
     # inpaint holes and move to zero
     patch = cv2.inpaint(patch, np.uint8(np.isnan(patch)),
                         inpaintRadius=3, flags=cv2.INPAINT_TELEA)
-    patch -= np.min(patch)
+    patch -= np.nanmin(patch)
 
     # compute slope
     slopeX = cv2.Sobel(patch, cv2.CV_32F, 1, 0, ksize=3) / p["resolution"]
