@@ -4,6 +4,7 @@ import tensorflow as tf
 import keras.backend as K
 from deep_ga import custom_objects
 from deepdiff import DeepDiff
+import os
 
 
 def get_all_layers(model, exclude="mobileNet"):
@@ -36,32 +37,21 @@ def try_copying_weights(model1, model2):
                     print("failed to copy")
 
 
-def find_equal_model(model, folder, name):
-    i = 1
-    filepath = os.path.join(folder, f"{name}_{i:02}.hdf5")
-    while os.path.isfile(filepath):
+def are_models_equal(model1, model2):
+    json1 = json.loads(re.sub(r"_\d+", "", model1.to_json()))
+    json2 = json.loads(re.sub(r"_\d+", "", model2.to_json()))
+    diff = DeepDiff(
+        json2, json1, exclude_regex_paths=r"\['function'\]\[0\]")
+    return len(diff) == 0:
+
+
+def find_equal_model(model, folder):
+    for filename in filter(lambda f: f.endswith(".hdf5"), os.listdir(folder)):
+        filepath = os.path.join(folder, filename)
         model2 = keras.models.load_model(
-            filepath,
+            os.path.join(folder,),
             custom_objects=custom_objects,
             compile=False
         )
-        json1 = json.loads(re.sub(r"_\d+", "", model.to_json()))
-        json2 = json.loads(re.sub(r"_\d+", "", model2.to_json()))
-        diff = DeepDiff(
-            json2, json1, exclude_regex_paths=r"\['function'\]\[0\]")
-        if len(diff) == 0:
-            print(f"Found file with same model structure: {filepath}")
-            model = model2
-            # change suffix
-            for layer in model.layers:
-                if "mobileNetV2" in layer.name:
-                    suffix = layer.name[len("mobileNetV2_"):]
-                    for w in layer.weights:
-                        split_name = w.name.split('/')
-                        w._handle_name = split_name[0] + \
-                            suffix + '/' + split_name[1] + suffix
-            return model
-        else:
-            print(f"Found file but has different model structure: {filepath}")
-        i = i + 1
-        filepath = os.path.join(folder, f"{name}_{i:02}.hdf5")
+        if are_models_equal(model, model2):
+            return filepath, modell2
