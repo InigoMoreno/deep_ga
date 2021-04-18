@@ -42,7 +42,7 @@ def are_models_equal(model1, model2):
     json2 = json.loads(re.sub(r"_\d+", "", model2.to_json()))
     diff = DeepDiff(
         json2, json1, exclude_regex_paths=r"\['function'\]\[0\]")
-    return len(diff) == 0:
+    return len(diff) == 0
 
 
 def find_equal_model(model, folder):
