@@ -183,7 +183,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         # find local patch
         # we asume the dems have already been filtered
         idx = random.randint(dems.shape[0])
-        local_patch = dems[i, :, :]
+        local_patch = dems[idx, :, :]
         local_patch -= np.nanmin(local_patch)
         if "augment_a" in p.keys() and p["augment_a"] is not None:
             local_patch = p["augment_a"].augment_image(local_patch)

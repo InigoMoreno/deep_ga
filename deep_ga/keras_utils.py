@@ -55,4 +55,4 @@ def find_equal_model(model, folder):
             compile=False
         )
         if are_models_equal(model, model2):
-            return filepath, modell2
+            return filepath, model2
