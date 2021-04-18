@@ -4,6 +4,7 @@ import tensorflow as tf
 import keras.backend as K
 from deep_ga import custom_objects
 from deepdiff import DeepDiff
+import re
 import os
 
 
@@ -49,7 +50,7 @@ def find_equal_model(model, folder):
     for filename in filter(lambda f: f.endswith(".hdf5"), os.listdir(folder)):
         filepath = os.path.join(folder, filename)
         model2 = keras.models.load_model(
-            os.path.join(folder,),
+            filepath,
             custom_objects=custom_objects,
             compile=False
         )
