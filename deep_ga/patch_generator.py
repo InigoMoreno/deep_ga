@@ -182,12 +182,16 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
     for i in range(batch_size):
         # find local patch
         # we asume the dems have already been filtered
-        idx = random.randint(dems.shape[0])
-        local_patch = dems[idx, :, :]
-        local_patch -= np.nanmin(local_patch)
-        if "augment_a" in p.keys() and p["augment_a"] is not None:
-            local_patch = p["augment_a"].augment_image(local_patch)
-        local_patches[i, :, :] = local_patch - np.nanmean(local_patch)
+        gt_global_patch = None
+        while gt_global_patch is None:
+            idx = random.randint(dems.shape[0])
+            local_patch = dems[idx, :, :]
+            local_patch -= np.nanmin(local_patch)
+            if "augment_a" in p.keys() and p["augment_a"] is not None:
+                local_patch = p["augment_a"].augment_image(local_patch)
+            local_patches[i, :, :] = local_patch - np.nanmean(local_patch)
+            gt_global_patch = get_patch(
+                global_dem, gps[idx, 1], gps[idx, 2], p, displacement)
 
         # find global patch close to local
         global_patch = None
