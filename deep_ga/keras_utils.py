@@ -6,12 +6,12 @@ from deep_ga import custom_objects
 from deepdiff import DeepDiff
 
 
-def get_all_layers(model):
+def get_all_layers(model, exclude == "mobileNet"):
     if not hasattr(model, "layers"):
         return model
     layers = []
     for layer in model.layers:
-        if hasattr(layer, "layers"):
+        if hasattr(layer, "layers") and (exclude is None or exclude not in layer.name):
             layers.extend(get_all_layers(layer))
         else:
             layers.append(layer)
