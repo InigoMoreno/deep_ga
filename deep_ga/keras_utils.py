@@ -6,7 +6,7 @@ from deep_ga import custom_objects
 from deepdiff import DeepDiff
 
 
-def get_all_layers(model, exclude == "mobileNet"):
+def get_all_layers(model, exclude="mobileNet"):
     if not hasattr(model, "layers"):
         return model
     layers = []
