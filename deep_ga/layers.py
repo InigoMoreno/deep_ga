@@ -65,7 +65,8 @@ class SymConv2D(keras.layers.Layer):
     def get_config(self):
         config = super().get_config().copy()
         config.update({
-            'filters': self.filters
+            'filters': self.filters,
+            'sobelInitial': self.sobelInitial
         })
         return config
 
