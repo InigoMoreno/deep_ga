@@ -144,7 +144,7 @@ class EuclideanDistanceLayer(keras.layers.Layer):
         return config
 
 
-import losses
+from deep_ga import losses
 
 custom_objects = {
     "SymConv2D": SymConv2D,
