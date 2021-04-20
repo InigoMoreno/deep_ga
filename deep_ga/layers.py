@@ -142,12 +142,3 @@ class EuclideanDistanceLayer(keras.layers.Layer):
     def get_config(self):
         config = super().get_config().copy()
         return config
-
-
-custom_objects = {
-    "SymConv2D": SymConv2D,
-    "PConv2D": PConv2D,
-    "EuclideanDistanceLayer": EuclideanDistanceLayer,
-    "NanToZero": NanToZero,
-    "IsNanMask": IsNanMask
-}
