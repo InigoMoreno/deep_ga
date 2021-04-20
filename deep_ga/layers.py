@@ -142,3 +142,16 @@ class EuclideanDistanceLayer(keras.layers.Layer):
     def get_config(self):
         config = super().get_config().copy()
         return config
+
+
+import losses
+
+custom_objects = {
+    "SymConv2D": SymConv2D,
+    "PConv2D": PConv2D,
+    "EuclideanDistanceLayer": EuclideanDistanceLayer,
+    "NanToZero": NanToZero,
+    "pairwise_contrastive_loss": losses.pairwise_contrastive_loss,
+    "binary_cross_entropy": losses.binary_cross_entropy,
+    "doomloss": losses.doomloss
+}
