@@ -215,7 +215,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         distances[i] = np.linalg.norm([dx, dy])
 
     if "augment_a" in p.keys() and p["augment_a"] is not None:
-        local_patches = p["augment_a"](local_patches.astype("float32"))
+        local_patches = p["augment_a"](images=local_patches.astype("float32"))
     return (local_patches, global_patches, distances)
 
 
