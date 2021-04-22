@@ -188,8 +188,9 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
             local_patch = dems[idx, :, :]
             local_patch -= np.nanmin(local_patch)
             if "augment_a" in p.keys() and p["augment_a"] is not None:
-                local_patch = p["augment_a"].augment_image(local_patch)
-            local_patches[i, :, :] = local_patch - np.nanmean(local_patch)
+                local_patch = p["augment_a"].augment_image(
+                    local_patch.astype("float32"))
+            local_patches[i, :, :] = local_patch
             gt_global_patch = get_patch(
                 global_dem, gps[idx, 1], gps[idx, 2], p, displacement)
 
