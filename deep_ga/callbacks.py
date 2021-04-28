@@ -40,3 +40,17 @@ class PlotPrediction(keras.callbacks.Callback):
         plt.xlabel("True distance")
         plt.ylabel("Predicted distance")
         plt.savefig(os.path.join(self.folder, f"valid_{epoch:03}v.pdf"))
+
+
+class ValidationProgbar(keras.callbacks.Callback):
+    def __init__(self, vgen):
+        self.pbar = None
+        self.N = len(vgen)
+        super(ValidationProgbar, self).__init__()
+
+    def on_test_batch_end(self, batch, logs=None):
+        if batch == 0:
+            print("\nValidation:")
+            self.pbar = keras.utils.Progbar(
+                self.N, stateful_metrics=logs.keys())
+        self.pbar.add(1, values=logs.items())
