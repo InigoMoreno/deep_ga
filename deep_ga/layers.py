@@ -154,4 +154,8 @@ custom_objects = {
     "pairwise_contrastive_loss": losses.pairwise_contrastive_loss,
     "binary_cross_entropy": losses.binary_cross_entropy,
     "doomloss": losses.doomloss
+    "PCL": losses.pairwise_contrastive_loss,
+    "BCE": losses.binary_cross_entropy,
+    "MSE": keras.losses.MSE,
+    "MAE": keras.losses.MAE
 }
