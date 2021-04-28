@@ -25,4 +25,4 @@ def pairwise_contrastive_loss(y_true, y_pred):
 
 def binary_cross_entropy(y_true, y_pred):
     mask = K.less(y_true, scale)
-    return keras.losses.binary_crossentropy(y_true, y_pred, label_smoothing=0)
+    return keras.losses.binary_crossentropy(mask, y_pred)
