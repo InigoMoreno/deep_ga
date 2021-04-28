@@ -88,7 +88,7 @@ def get_model(hyperparams, input_a, input_b=None):
         if hyperparams["secondLayerSize"] > 0:
             tensor = keras.layers.Dense(
                 hyperparams["secondLayerSize"], activation=hyperparams["activation"])(tensor)
-        embedding_dist = keras.layers.Dense(1, activation="sigmoid")(middle)
+        embedding_dist = keras.layers.Dense(1, activation="sigmoid")(tensor)
     else:
         embedding_dist = deep_ga.EuclideanDistanceLayer()(
             [embedding_a, embedding_b])
