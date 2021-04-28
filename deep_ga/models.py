@@ -129,8 +129,13 @@ def compile_model(model, distances, hyperparams):
     else:
         raise ValueError(f"unknown optimizer {hyperparams['optimizer']}")
 
+    if hyperparams["learnEnding"]:
+        loss = "BCE",
+    else:
+        loss = hyperparams["loss"]
+
     model.compile(
-        loss=losses[hyperparams["loss"]],
+        loss=losses[hyperparams[loss]],
         metrics=list(losses.values()),
         optimizer=optimizer
     )
