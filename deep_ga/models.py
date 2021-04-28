@@ -130,7 +130,7 @@ def compile_model(model, distances, hyperparams):
         raise ValueError(f"unknown optimizer {hyperparams['optimizer']}")
 
     if hyperparams["learnEnding"]:
-        loss = "BCE",
+        loss = "BCE"
     else:
         loss = hyperparams["loss"]
 
