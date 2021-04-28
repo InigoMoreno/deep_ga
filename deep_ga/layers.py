@@ -153,7 +153,7 @@ custom_objects = {
     "NanToZero": NanToZero,
     "pairwise_contrastive_loss": losses.pairwise_contrastive_loss,
     "binary_cross_entropy": losses.binary_cross_entropy,
-    "doomloss": losses.doomloss
+    "doomloss": losses.doomloss,
     "PCL": losses.pairwise_contrastive_loss,
     "BCE": losses.binary_cross_entropy,
     "MSE": keras.losses.MSE,
