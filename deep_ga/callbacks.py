@@ -1,6 +1,8 @@
 import deep_ga
 import tensorflow as tf
 from tensorflow import keras
+import os
+import matplotlib.pyplot as plt
 
 
 class AssertWeightsFinite(keras.callbacks.Callback):
