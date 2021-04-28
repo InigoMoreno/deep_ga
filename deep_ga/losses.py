@@ -20,7 +20,7 @@ def doomloss(y_true, y_pred):
 
 def pairwise_contrastive_loss(y_true, y_pred):
     mask = K.less(y_true, scale)
-    return K.mean(K.switch(mask, K.square(y_pred), K.square(K.maximum(margin - y_pred, 0))))
+    return K.mean(K.switch(mask, K.square(y_pred), K.square(K.maximum(scale - y_pred, 0))))
 
 
 def binary_cross_entropy(y_true, y_pred):
