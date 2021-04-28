@@ -69,7 +69,7 @@ def get_model(hyperparams, input_a, input_b=None):
     shared_weights = hyperparams["sharedWeights"]
     if shared_weights:
         branch_model = keras.Model(inputs=[input_a], outputs=single_branch(
-            input, hyperparams, suffix=""), name="single_branch")
+            input_a, hyperparams, suffix=""), name="single_branch")
         embedding_b = branch_model(input_b)
         embedding_a = branch_model(input_a)
     else:
