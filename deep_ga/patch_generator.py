@@ -236,14 +236,21 @@ class PatchDataGenerator(keras.utils.Sequence):
         self.batch_size = batch_size
         self.params = params
 
+    def get_batch(self, batch_size=None):
+        """Generate one batch of data"""
+        if batch_size is None:
+            Xa, Xb, y = get_batch(self.batch_size, self.dem, self.params)
+        else:
+            Xa, Xb, y = get_batch(batch_size, self.dem, self.params)
+        return [Xa, Xb], y
+
     def __len__(self):
         """Denotes the number of batches per epoch"""
         return int(np.floor(self.size / self.batch_size))
 
     def __getitem__(self, index):
         """Generate one batch of data"""
-        Xa, Xb, y = get_batch(self.batch_size, self.dem, self.params)
-        return [Xa, Xb], y
+        return self.get_batch()
 
 
 class LocalGlobalPatchDataGenerator(keras.utils.Sequence):
@@ -269,12 +276,20 @@ class LocalGlobalPatchDataGenerator(keras.utils.Sequence):
         self.batch_size = batch_size
         self.params = params
 
+    def get_batch(self, batch_size=None):
+        """Generate one batch of data"""
+        if batch_size is None:
+            Xa, Xb, y = get_batch_local_global(
+                self.batch_size, self.dems, self.gps, self.global_dem, self.displacement, self.params)
+        else:
+            Xa, Xb, y = get_batch_local_global(
+                batch_size, self.dems, self.gps, self.global_dem, self.displacement, self.params)
+        return [Xa, Xb], y
+
     def __len__(self):
         """Denotes the number of batches per epoch"""
         return int(np.floor(self.size / self.batch_size))
 
     def __getitem__(self, index):
         """Generate one batch of data"""
-        Xa, Xb, y = get_batch_local_global(
-            self.batch_size, self.dems, self.gps, self.global_dem, self.displacement, self.params)
-        return [Xa, Xb], y
+        return self.get_batch()
