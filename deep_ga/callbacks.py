@@ -25,7 +25,7 @@ class PlotPrediction(keras.callbacks.Callback):
         super(PlotPrediction, self).__init__()
 
     def on_epoch_end(self, epoch, logs=None):
-        tx, ty = self.tgen[0]
+        tx, ty = self.tgen.get_batch(200)
         typ = self.model.predict(tx)[:, 0]
         plt.clf()
         plt.scatter(ty, typ, 2)
@@ -33,7 +33,7 @@ class PlotPrediction(keras.callbacks.Callback):
         plt.ylabel("Predicted distance")
         plt.savefig(os.path.join(self.folder, f"train_{epoch:03}.pdf"))
 
-        vx, vy = self.vgen[0]
+        vx, vy = self.vgen.get_batch(200)
         vyp = self.model.predict(vx)[:, 0]
         plt.clf()
         plt.scatter(vy, vyp, 2)
