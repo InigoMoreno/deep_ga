@@ -17,15 +17,15 @@ class AssertWeightsFinite(keras.callbacks.Callback):
 
 
 class PlotPrediction(keras.callbacks.Callback):
-    def __init__(self, folder):
+    def __init__(self, folder, tgen, vgen):
         self.folder = folder
+        self.tgen = tgen
+        self.vgen = vgen
         os.makedirs(folder, exist_ok=True)
         super(PlotPrediction, self).__init__()
 
     def on_epoch_end(self, epoch, logs=None):
-        tgen = deep_ga.LocalGlobalPatchDataGenerator(
-            tdems.shape[0], 20, tdems, tgps, global_dem, displacement, p)
-        tx, ty = tgen[0]
+        tx, ty = self.tgen[0]
         typ = self.model.predict(tx)[:, 0]
         plt.clf()
         plt.scatter(ty, typ, 2)
@@ -33,9 +33,7 @@ class PlotPrediction(keras.callbacks.Callback):
         plt.ylabel("Predicted distance")
         plt.savefig(os.path.join(self.folder, f"train_{epoch:03}.pdf"))
 
-        vgen = deep_ga.LocalGlobalPatchDataGenerator(
-            vdems.shape[0], 20, vdems, vgps, global_dem, displacement, p)
-        vx, vy = vgen[0]
+        vx, vy = self.vgen[0]
         vyp = self.model.predict(vx)[:, 0]
         plt.clf()
         plt.scatter(vy, vyp, 2)
