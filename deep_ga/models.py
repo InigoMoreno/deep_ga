@@ -45,9 +45,10 @@ def single_branch(input_tensor, hyperparams, suffix=None):
         weights=hyperparams["mobileNet_weights"]
     )
 
-    for (i, layer) in enumerate(mobileNet.layers):
-        if i < len(mobileNet.layers) - 4:
-            layer.trainable = False
+    if hyperparams["mobileNet_weights"] is not None:
+        for (i, layer) in enumerate(mobileNet.layers):
+            if i < len(mobileNet.layers) - 4:
+                layer.trainable = False
 
     tensor = mobileNet(tensor)
     if not hyperparams["learnEnding"]:
