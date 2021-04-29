@@ -135,7 +135,7 @@ def compile_model(model, distances, hyperparams):
         loss = hyperparams["loss"]
 
     model.compile(
-        loss=losses[hyperparams[loss]],
+        loss=losses[loss],
         # metrics=list(losses.values()),
         optimizer=optimizer
     )
