@@ -3,7 +3,7 @@ import tensorflow as tf
 import keras.backend as K
 import numpy as np
 
-scale = 10
+scale = 6
 
 
 def set_scale(new_scale):
