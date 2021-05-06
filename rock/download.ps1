@@ -1,7 +1,7 @@
 $REMOTE='https://robotics.estec.esa.int/';
 $REMOTEFOLDER = 'owncloud/public.php/webdav/';
 $USERNAME = 'vc96L9nGPW8NWjP';
-$PASSWORD = '***REMOVED***';
+$PASSWORD = Read-Host -Prompt 'Input the password';
 
 # Define custom auth header
 $secpasswd = ConvertTo-SecureString $PASSWORD -AsPlainText -Force
