@@ -7,25 +7,47 @@ from numba import cuda
 
 @cuda.jit
 def gpu_occlusion(patch, height):
+    # get shape of image
     W, H = patch.shape
-
+    
+    # get center of patch
     cx = round((W - 1) / 2)
     cy = round((H - 1) / 2)
+    
+    # get 3d robot position (some meters above the ground on the center)
     c = (cx, cy, patch[cx, cy] + height)
 
+    # for each x,y in the grid
     x, y = cuda.grid(2)
     if x < W and y < H:
+        
+        # get 3d position
         p = (x, y, patch[x, y])
+        
+        # compute vector difference between ground and robot
         to = (c[0] - p[0], c[1] - p[1], c[2] - p[2])
+        
+        # compute distance between ground and robot
         dist = math.sqrt(math.pow(to[0], 2) +
-                         math.pow(to[1], 2) + math.pow(to[1], 2))
+                         math.pow(to[1], 2) + 
+                         math.pow(to[2], 2))
+        
+        # normalize vector difference
         dir = (to[0] / dist, to[1] / dist, to[2] / dist)
+        
+        # iterate ray
         for h in range(0, math.ceil(dist)):
+            # compute 3d position of ray
             step_pos_ray = (p[0] + h * dir[0], p[1] +
                             h * dir[1], p[2] + h * dir[2])
+            
+            # get discrete position in x,y
             sx, sy = round(step_pos_ray[0]), round(step_pos_ray[1])
+            # if position has not changed skip step
             if (sx, sy) == (x, y):
                 continue
+                
+            # if ray is under ground, mark as occulded
             if step_pos_ray[2] <= patch[sx, sy]:
                 patch[x, y] = np.nan
                 break
