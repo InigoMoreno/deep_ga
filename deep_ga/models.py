@@ -78,7 +78,7 @@ def get_model(hyperparams, input_a, input_b=None):
         embedding_b = single_branch(input_b, hyperparams, suffix="-b")
 
     if hyperparams["learnEnding"]:
-        tensor = keras.layers.Subtract()([embedding_a, embedding_b])
+        tensor = keras.layers.Concatenate()([embedding_a, embedding_b])
         if hyperparams["firstLayerSize"] > 0:
             tensor = keras.layers.Dense(
                 hyperparams["firstLayerSize"], activation=hyperparams["activation"])(tensor)
