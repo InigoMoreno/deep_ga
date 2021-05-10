@@ -14,6 +14,7 @@ class AssertWeightsFinite(keras.callbacks.Callback):
             if not tf.math.reduce_all(tf.math.is_finite(weight)):
                 print(f"Weight {weight.name} not finite, stop training")
                 self.model.stop_training = True
+                break
 
 
 class PlotPrediction(keras.callbacks.Callback):
