@@ -17,29 +17,42 @@ class AssertWeightsFinite(keras.callbacks.Callback):
 
 
 class PlotPrediction(keras.callbacks.Callback):
-    def __init__(self, folder, tgen, vgen):
+    def __init__(self, folder, tgen, vgen, save=True):
         self.folder = folder
         self.tgen = tgen
         self.vgen = vgen
-        os.makedirs(folder, exist_ok=True)
+        self.save = save
+        if self.save:
+            os.makedirs(folder, exist_ok=True)
         super(PlotPrediction, self).__init__()
 
     def on_epoch_end(self, epoch, logs=None):
+        ylabel = ("Match Probability"
+                  if self.model.loss.__name__ == "BCE"
+                  else "Predicted distance")
         tx, ty = self.tgen.get_batch(200)
         typ = self.model.predict(tx)[:, 0]
         plt.clf()
         plt.scatter(ty, typ, 2)
-        plt.xlabel("True distance")
-        plt.ylabel("Predicted distance")
-        plt.savefig(os.path.join(self.folder, f"train_{epoch:03}.pdf"))
+        plt.title("Training Data")
+        plt.xlabel("Distance between local and global patch")
+        plt.ylabel(ylabel)
+        if self.save:
+            plt.savefig(os.path.join(self.folder, f"train_{epoch:03}.pdf"))
+        else:
+            plt.show()
 
         vx, vy = self.vgen.get_batch(200)
         vyp = self.model.predict(vx)[:, 0]
         plt.clf()
         plt.scatter(vy, vyp, 2)
-        plt.xlabel("True distance")
-        plt.ylabel("Predicted distance")
-        plt.savefig(os.path.join(self.folder, f"valid_{epoch:03}v.pdf"))
+        plt.title("Validation Data")
+        plt.xlabel("Distance between local and global patch")
+        plt.ylabel(ylabel)
+        if self.save:
+            plt.savefig(os.path.join(self.folder, f"valid_{epoch:03}v.pdf"))
+        else:
+            plt.show()
 
 
 class ValidationProgbar(keras.callbacks.Callback):
