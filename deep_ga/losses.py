@@ -19,7 +19,7 @@ def doomloss(y_true, y_pred):
 
 
 def NMSE(y_true, y_pred):
-    return keras.losses.MSE(y_true, y_pred) / keras.losses.MSE(y_true, scale)
+    return keras.losses.MSE(y_true, y_pred) / keras.losses.MSE(y_true, K.cast(scale, "float32"))
 
 
 def pairwise_contrastive_loss(y_true, y_pred):
