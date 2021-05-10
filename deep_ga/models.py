@@ -110,7 +110,7 @@ def compile_model(model, distances, hyperparams):
         return normalize
 
     losses = {
-        "MSE": deep_ga.losses.NMSE,
+        "MSE": keras.losses.MSE,
         "MAE": keras.losses.MAE,
         "DOOMSE": deep_ga.doomloss,
         "PCL": deep_ga.pairwise_contrastive_loss,
