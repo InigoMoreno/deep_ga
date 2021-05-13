@@ -37,6 +37,8 @@ class PlotPrediction(keras.callbacks.Callback):
         plt.scatter(ty, typ, 2)
         plt.title("Training Data")
         plt.xlabel("Distance between local and global patch")
+        plt.xlim(0, plt.xlim()[1])
+        plt.ylim(0, plt.ylim()[1])
         plt.ylabel(ylabel)
         if self.save:
             plt.savefig(os.path.join(self.folder, f"train_{epoch:03}.pdf"))
@@ -49,6 +51,8 @@ class PlotPrediction(keras.callbacks.Callback):
         plt.scatter(vy, vyp, 2)
         plt.title("Validation Data")
         plt.xlabel("Distance between local and global patch")
+        plt.xlim(0, plt.xlim()[1])
+        plt.ylim(0, plt.ylim()[1])
         plt.ylabel(ylabel)
         if self.save:
             plt.savefig(os.path.join(self.folder, f"valid_{epoch:03}v.pdf"))
