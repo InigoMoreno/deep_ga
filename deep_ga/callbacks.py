@@ -39,6 +39,8 @@ class PlotPrediction(keras.callbacks.Callback):
         plt.xlabel("Distance between local and global patch")
         plt.xlim(0, plt.xlim()[1])
         plt.ylim(0, plt.ylim()[1])
+        if self.model.loss.__name__ == "BCE":
+            plt.ylim(0, 1)
         plt.ylabel(ylabel)
         if self.save:
             plt.savefig(os.path.join(self.folder, f"train_{epoch:03}.pdf"))
@@ -53,6 +55,8 @@ class PlotPrediction(keras.callbacks.Callback):
         plt.xlabel("Distance between local and global patch")
         plt.xlim(0, plt.xlim()[1])
         plt.ylim(0, plt.ylim()[1])
+        if self.model.loss.__name__ == "BCE":
+            plt.ylim(0, 1)
         plt.ylabel(ylabel)
         if self.save:
             plt.savefig(os.path.join(self.folder, f"valid_{epoch:03}v.pdf"))
