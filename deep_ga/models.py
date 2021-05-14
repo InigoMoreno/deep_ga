@@ -1,5 +1,7 @@
 import deep_ga
 from tensorflow import keras
+import keras.backend as K
+import numpy as np
 
 
 def single_branch(input_tensor, hyperparams, suffix=None):
@@ -69,13 +71,28 @@ def single_branch(input_tensor, hyperparams, suffix=None):
 def get_model(hyperparams, input_a, input_b=None):
     shared_weights = hyperparams["sharedWeights"]
     if shared_weights:
-        branch_model = keras.Model(inputs=[input_a], outputs=single_branch(
-            input_a, hyperparams, suffix=""), name="single_branch")
-        embedding_b = branch_model(input_b)
+        if "loadBranch" in hyperparams.keys() and hyperparams["loadBranch"] is not None:
+            loadModel = keras.models.load_model(
+                hyperparams["loadBranch"], custom_objects=deep_ga.custom_objects, compile=False)
+            branch_model = loadModel.get_layer("single_branch")
+        else:
+            branch_model = keras.Model(inputs=[input_a], outputs=single_branch(
+                input_a, hyperparams, suffix=""), name="single_branch")
         embedding_a = branch_model(input_a)
+        embedding_b = branch_model(input_b)
     else:
-        embedding_a = single_branch(input_a, hyperparams, suffix="-a")
-        embedding_b = single_branch(input_b, hyperparams, suffix="-b")
+        if "loadBranch" in hyperparams.keys() and hyperparams["loadBranch"] is not None:
+            loadModel = keras.models.load_model(
+                hyperparams["loadBranch"], custom_objects=deep_ga.custom_objects, compile=False)
+            branch_model_a = loadModel.get_layer("branch_a")
+            branch_model_b = loadModel.get_layer("branch_b")
+        else:
+            branch_model_a = keras.Model(inputs=[input_a], outputs=single_branch(
+                input_a, hyperparams, suffix="-a"), name="branch_a")
+            branch_model_b = keras.Model(inputs=[input_b], outputs=single_branch(
+                input_b, hyperparams, suffix="-b"), name="branch_b")
+        embedding_b = branch_model_b(input_b)
+        embedding_a = branch_model_a(input_a)
 
     if hyperparams["learnEnding"]:
         tensor = keras.layers.Concatenate()([embedding_a, embedding_b])
