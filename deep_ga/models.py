@@ -71,7 +71,7 @@ def single_branch(input_tensor, hyperparams, suffix=None):
 def set_trainable_only_last(model):
     layers = deep_ga.get_all_layers(model, None)
     idx = layers.index([l for l in layers if "block" in l.name][-1])
-    for layer in layers[:idx]:
+    for layer in layers[:idx + 1]:
         layer.trainable = False
 
 
