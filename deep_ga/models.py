@@ -68,6 +68,14 @@ def single_branch(input_tensor, hyperparams, suffix=None):
     return tensor
 
 
+def set_trainable_only_last(model):
+    model.trainable = False
+    layers = deep_ga.get_all_layers(model.get_layer("single_branch"), None)
+    idx = layers.index([l for l in layers if "block" in l.name][-1])
+    for layer in layers[idx + 1:]:
+        layer.trainable = True
+
+
 def get_model(hyperparams, input_a, input_b=None):
     shared_weights = hyperparams["sharedWeights"]
     if shared_weights:
@@ -75,7 +83,7 @@ def get_model(hyperparams, input_a, input_b=None):
             loadModel = keras.models.load_model(
                 hyperparams["loadBranch"], custom_objects=deep_ga.custom_objects, compile=False)
             branch_model = loadModel.get_layer("single_branch")
-            branch_model.trainable = False
+            set_trainable_only_last(branch_model)
         else:
             branch_model = keras.Model(inputs=[input_a], outputs=single_branch(
                 input_a, hyperparams, suffix=""), name="single_branch")
@@ -86,9 +94,9 @@ def get_model(hyperparams, input_a, input_b=None):
             loadModel = keras.models.load_model(
                 hyperparams["loadBranch"], custom_objects=deep_ga.custom_objects, compile=False)
             branch_model_a = loadModel.get_layer("branch_a")
-            branch_model_a.trainable = False
+            set_trainable_only_last(branch_model_a)
             branch_model_b = loadModel.get_layer("branch_b")
-            branch_model_b.trainable = False
+            set_trainable_only_last(branch_model_b)
         else:
             branch_model_a = keras.Model(inputs=[input_a], outputs=single_branch(
                 input_a, hyperparams, suffix="-a"), name="branch_a")
