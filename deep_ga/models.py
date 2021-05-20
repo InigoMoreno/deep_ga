@@ -2,6 +2,7 @@ import deep_ga
 from tensorflow import keras
 import keras.backend as K
 import numpy as np
+import os
 
 
 def single_branch(input_tensor, hyperparams, suffix=None):
@@ -76,6 +77,11 @@ def set_trainable_only_last(model):
 
 
 def get_model(hyperparams, input_a, input_b=None):
+    load_path = None
+    if "loadBranch" in hyperparams.keys():
+        load_path = hyperparams["loadBranch"]
+    if "loadFolder" in hyperparams.keys() and hyperparams["loadFolder"] is not None and load_path is not None:
+        load_path = os.path.join(hyperparams["loadFolder"], load_path)
     shared_weights = hyperparams["sharedWeights"]
     if shared_weights:
         if "loadBranch" in hyperparams.keys() and hyperparams["loadBranch"] is not None:
