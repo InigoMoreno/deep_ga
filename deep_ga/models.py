@@ -84,9 +84,9 @@ def get_model(hyperparams, input_a, input_b=None):
         load_path = os.path.join(hyperparams["loadFolder"], load_path)
     shared_weights = hyperparams["sharedWeights"]
     if shared_weights:
-        if "loadBranch" in hyperparams.keys() and hyperparams["loadBranch"] is not None:
+        if load_path is not None:
             loadModel = keras.models.load_model(
-                hyperparams["loadBranch"], custom_objects=deep_ga.custom_objects, compile=False)
+                load_path, custom_objects=deep_ga.custom_objects, compile=False)
             branch_model = loadModel.get_layer("single_branch")
             set_trainable_only_last(branch_model)
         else:
@@ -95,9 +95,9 @@ def get_model(hyperparams, input_a, input_b=None):
         embedding_a = branch_model(input_a)
         embedding_b = branch_model(input_b)
     else:
-        if "loadBranch" in hyperparams.keys() and hyperparams["loadBranch"] is not None:
+        if load_path is not None:
             loadModel = keras.models.load_model(
-                hyperparams["loadBranch"], custom_objects=deep_ga.custom_objects, compile=False)
+                load_path, custom_objects=deep_ga.custom_objects, compile=False)
             branch_model_a = loadModel.get_layer("branch_a")
             set_trainable_only_last(branch_model_a)
             branch_model_b = loadModel.get_layer("branch_b")
