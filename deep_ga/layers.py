@@ -24,10 +24,10 @@ class SymConv2D(keras.layers.Layer):
         if self.sobelInitial:
             assert self.filters < 5, "Only four sobel filters available"
             sobel_weights = np.array([
-                [1, 3, 1, 0],  # x
-                [1, 0, -1, 3],  # y
-                [3, 1, 0, 1],  # xy
-                [0, 1, 3, -1]  # yx
+                [1, 2, 1, 0],  # x
+                [1, 0, -1, 2],  # y
+                [2, 1, 0, 1],  # xy
+                [0, 1, 2, -1]  # yx
             ], np.float32)
             sobel_weights = np.reshape(sobel_weights.transpose(), (4, 1, 4))
             sobel_weights = sobel_weights[:, :, :self.filters]
