@@ -54,17 +54,17 @@ def single_branch(input_tensor, hyperparams, suffix=None):
                 layer.trainable = False
 
     tensor = mobileNet(tensor)
-    if not hyperparams["learnEnding"]:
-        if hyperparams["firstLayerSize"] > 0:
-            tensor = keras.layers.Dense(
-                hyperparams["firstLayerSize"], activation=hyperparams["activation"])(tensor)
 
-        if hyperparams["dropout"] > 0:
-            tensor = keras.layers.Dropout(hyperparams["dropout"])(tensor)
+    if hyperparams["firstLayerSize"] > 0:
+        tensor = keras.layers.Dense(
+            hyperparams["firstLayerSize"], activation=hyperparams["activation"])(tensor)
 
-        if hyperparams["secondLayerSize"] > 0:
-            tensor = keras.layers.Dense(
-                hyperparams["secondLayerSize"], activation=hyperparams["activation"])(tensor)
+    if hyperparams["dropout"] > 0:
+        tensor = keras.layers.Dropout(hyperparams["dropout"])(tensor)
+
+    if hyperparams["secondLayerSize"] > 0:
+        tensor = keras.layers.Dense(
+            hyperparams["secondLayerSize"], activation=hyperparams["activation"])(tensor)
 
     return tensor
 
@@ -112,17 +112,10 @@ def get_model(hyperparams, input_a, input_b=None):
 
     if hyperparams["learnEnding"]:
         tensor = keras.layers.Concatenate()([embedding_a, embedding_b])
-        if hyperparams["firstLayerSize"] > 0:
+        if "learnSize" in hyperparams.keys() and hyperparams["learnSize"] > 0:
             tensor = keras.layers.Dense(
-                hyperparams["firstLayerSize"], activation=hyperparams["activation"])(tensor)
-
-        if hyperparams["dropout"] > 0:
-            tensor = keras.layers.Dropout(hyperparams["dropout"])(tensor)
-
-        if hyperparams["secondLayerSize"] > 0:
-            tensor = keras.layers.Dense(
-                hyperparams["secondLayerSize"], activation=hyperparams["activation"])(tensor)
-        embedding_dist = keras.layers.Dense(1, activation="sigmoid")(tensor)
+                hyperparams["learnSize"], activation=hyperparams["activation"])(tensor)
+        embedding_dist = keras.layers.Dense(1)(tensor)
     else:
         embedding_dist = deep_ga.EuclideanDistanceLayer()(
             [embedding_a, embedding_b])
@@ -147,7 +140,7 @@ def compile_model(model, distances, hyperparams):
         "MAE": keras.losses.MAE,
         "DOOMSE": deep_ga.doomloss,
         "PCL": deep_ga.pairwise_contrastive_loss,
-        "BCE": deep_ga.binary_cross_entropy,
+        # "BCE": deep_ga.binary_cross_entropy,
     }
 
     for name, loss in losses.items():
@@ -162,11 +155,6 @@ def compile_model(model, distances, hyperparams):
             learning_rate=hyperparams["learning_rate"])
     else:
         raise ValueError(f"unknown optimizer {hyperparams['optimizer']}")
-
-    if hyperparams["learnEnding"]:
-        loss = "BCE"
-    else:
-        loss = hyperparams["loss"]
 
     model.compile(
         loss=losses[loss],
