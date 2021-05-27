@@ -18,6 +18,10 @@ def doomloss(y_true, y_pred):
     return K.mean(weight * K.square(y_true - y_pred))
 
 
+def MSRE(y_true, y_pred):
+    return K.mean(K.square((y_true - y_pred) / (y_true + y_pred + 1e-10)))
+
+
 def pairwise_contrastive_loss(y_true, y_pred):
     mask = K.less(y_true, scale)
     return K.mean(K.switch(mask, K.square(y_pred), K.square(K.maximum(scale - y_pred, 0))))

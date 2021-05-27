@@ -140,6 +140,7 @@ def compile_model(model, distances, hyperparams):
         "MAE": keras.losses.MAE,
         "DOOMSE": deep_ga.doomloss,
         "PCL": deep_ga.pairwise_contrastive_loss,
+        "MSRE": deep_ga.MSRE,
         # "BCE": deep_ga.binary_cross_entropy,
     }
 

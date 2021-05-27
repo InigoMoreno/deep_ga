@@ -157,5 +157,6 @@ custom_objects = {
     "PCL": losses.pairwise_contrastive_loss,
     "BCE": losses.binary_cross_entropy,
     "MSE": keras.losses.MSE,
-    "MAE": keras.losses.MAE
+    "MAE": keras.losses.MAE,
+    "MSRE": losses.MSRE
 }
