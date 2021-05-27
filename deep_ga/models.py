@@ -158,7 +158,7 @@ def compile_model(model, distances, hyperparams):
         raise ValueError(f"unknown optimizer {hyperparams['optimizer']}")
 
     model.compile(
-        loss=losses[loss],
+        loss=losses[hyperparams["loss"]],
         # metrics=list(losses.values()),
         optimizer=optimizer
     )
