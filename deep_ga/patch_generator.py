@@ -111,7 +111,7 @@ def get_patch(dem, x, y, p, displacement=(0, 0), skipChecks=False):
     return patch
 
 
-def get_batch(batch_size, dem, p, seed=None):
+def get_batch(batch_size, dem, p, seed=None, disp=None):
     """Get a batch of patches for training
 
     Args:
@@ -152,7 +152,9 @@ def get_batch(batch_size, dem, p, seed=None):
         # find second patch close to first
         patch_b = None
         while patch_b is None:
-            if p["booleanDist"]:
+            if disp is not None:
+                dx, dy = disp
+            elif p["booleanDist"]:
                 if random.choice([True, False]):
                     dx, dy = 0, 0
                 else:
@@ -173,7 +175,7 @@ def get_batch(batch_size, dem, p, seed=None):
     return (patches_a, patches_b, distances)
 
 
-def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, seed=None):
+def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, seed=None, disp=None):
     """Get a batch of local and global patches for training
 
     Args:
@@ -217,7 +219,9 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
         global_patch = None
         while global_patch is None:
 
-            if p["booleanDist"]:
+            if disp is not None:
+                dx, dy = disp
+            elif p["booleanDist"]:
                 if random.choice([True, False]):
                     dx, dy = 0, 0
                 else:
