@@ -165,6 +165,8 @@ def get_batch(batch_size, dem, p, seed=None, disp=None):
                 dx, dy = random.normal(
                     scale=p["stdPatchShift"] / p["resolution"], size=2)
             patch_b = get_patch(dem, xa + dx, ya + dy, p)
+            if disp is not None:
+                break
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             patch_b = p["augment_b"].augment_image(patch_b)
         patches_b[i, :, :] = patch_b - np.nanmean(patch_b)
@@ -233,6 +235,8 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
                     scale=p["stdPatchShift"] / p["resolution"], size=2)
             global_patch = get_patch(
                 global_dem, gps[idx, 1] + dx, gps[idx, 2] + dy, p, displacement)
+            if disp is not None:
+                break
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             global_patch = p["augment_b"].augment_image(global_patch)
         global_patches[i, :, :] = global_patch - np.nanmean(global_patch)
