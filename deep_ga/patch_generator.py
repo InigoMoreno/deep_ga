@@ -169,7 +169,10 @@ def get_batch(batch_size, dem, p, seed=None, disp=None):
                 break
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             patch_b = p["augment_b"].augment_image(patch_b)
-        patches_b[i, :, :] = patch_b - np.nanmean(patch_b)
+        if patch_b is None:
+            patches_b = None
+        else:
+            patches_b[i, :, :] = patch_b - np.nanmean(patch_b)
 
         # compute output function
         distances[i] = np.linalg.norm([dx, dy]) * p["resolution"]
@@ -239,7 +242,10 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
                 break
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             global_patch = p["augment_b"].augment_image(global_patch)
-        global_patches[i, :, :] = global_patch - np.nanmean(global_patch)
+        if global_patch is None:
+            global_patches = None
+        else:
+            global_patches[i, :, :] = global_patch - np.nanmean(global_patch)
 
         # compute output function
         distances[i] = np.linalg.norm([dx, dy]) * p["resolution"]
