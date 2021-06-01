@@ -236,7 +236,7 @@ def get_batch_local_global(batch_size, dems, gps, global_dem, displacement, p, s
                 dx, dy = random.normal(
                     scale=p["stdPatchShift"] / p["resolution"], size=2)
             global_patch = get_patch(
-                global_dem, gps[idx, 1] + dx, gps[idx, 2] + dy, p, displacement, disp is not None)
+                global_dem, gps[idx, 1] + dx, gps[idx, 2] + dy, p, displacement, True)
         if "augment_b" in p.keys() and p["augment_b"] is not None:
             global_patch = p["augment_b"].augment_image(global_patch)
         if global_patch is None:
